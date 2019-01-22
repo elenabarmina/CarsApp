@@ -1,6 +1,5 @@
 package com.example.carsapp.db_helpers;
 
-import com.example.carsapp.CarsApplication;
 import com.example.carsapp.entities.Car;
 
 import java.util.UUID;
