@@ -1,21 +1,22 @@
 package com.example.carsapp.activities;
 
 import android.graphics.Canvas;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.View;
 
 import com.example.carsapp.R;
 import com.example.carsapp.adapters.CarDataAdapter;
 import com.example.carsapp.controllers.SwipeController;
 import com.example.carsapp.controllers.SwipeControllerActions;
-import com.example.carsapp.pojo.Car;
+import com.example.carsapp.entities.Car;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,20 +30,27 @@ public class MainActivity extends AppCompatActivity {
 
         setCarDataAdapter();
         setupRecyclerView();
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //todo add activity
+            }
+        });
     }
 
     private void setCarDataAdapter() {
-        List<Car> carsList = new ArrayList<>();
 
-        carsList.add(new Car("Toyota", BigInteger.valueOf(15000L)));
-        carsList.add(new Car("Nissan", BigInteger.valueOf(20000L)));
+        Realm realm = Realm.getDefaultInstance();
+        RealmResults<Car> carList = realm.where(Car.class).findAll();
 
-        carAdapter = new CarDataAdapter(carsList);
+        carAdapter = new CarDataAdapter(carList);
 
     }
 
     private void setupRecyclerView() {
-        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(carAdapter);

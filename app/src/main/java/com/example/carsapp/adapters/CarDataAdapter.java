@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.carsapp.R;
-import com.example.carsapp.pojo.Car;
+import com.example.carsapp.entities.Car;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class CarDataAdapter extends
 
         public CarViewHolder(View view) {
             super(view);
-            model = (TextView) view.findViewById(R.id.model);
+            model = (TextView) view.findViewById(R.id.car_name);
             price = (TextView) view.findViewById(R.id.price);
         }
     }
@@ -45,7 +45,13 @@ public class CarDataAdapter extends
     @Override
     public void onBindViewHolder(CarViewHolder holder, int position) {
         Car car = cars.get(position);
-        holder.model.setText(car.getModel());
+
+        StringBuilder sbCarName = new StringBuilder();
+        sbCarName.append(car.getCarModel().getModelBrand().getName())
+                .append(" ")
+                .append(car.getCarModel().getModelName());
+
+        holder.model.setText(sbCarName.toString());
         holder.price.setText(car.getPrice().toString());
     }
 
