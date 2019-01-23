@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.carsapp.R;
+import com.example.carsapp.db_helpers.CarsDBHelper;
 import com.example.carsapp.entities.Car;
 
 import java.util.List;
@@ -17,7 +18,8 @@ public class CarDataAdapter extends
     private List<Car> cars;
 
     public void removeCarByPosition(int position){
-        cars.remove(position);
+        CarsDBHelper dbHelper = new CarsDBHelper();
+        dbHelper.deleteCar(position);
     }
 
     public class CarViewHolder extends RecyclerView.ViewHolder {

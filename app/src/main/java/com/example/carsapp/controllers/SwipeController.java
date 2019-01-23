@@ -1,37 +1,38 @@
 package com.example.carsapp.controllers;
 
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper.Callback;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.example.carsapp.R;
-import com.example.carsapp.enums.SwipeCarButtons;
-
 import static android.support.v7.widget.helper.ItemTouchHelper.*;
+
+enum ButtonsState {
+    GONE,
+    LEFT_VISIBLE,
+    RIGHT_VISIBLE
+}
 
 public class SwipeController extends Callback {
 
     private boolean swipeBack = false;
-    private SwipeCarButtons buttonShowed = SwipeCarButtons.NONE;
-    private RectF buttonInstance = null;
-    private RecyclerView.ViewHolder currentItemViewHolder = null;
-    private SwipeControllerActions buttonsActions;
-    private static final float buttonWidth = 300;
-    private Resources resources = null;
 
-    public SwipeController(SwipeControllerActions buttonsActions, Resources resources) {
+    private ButtonsState buttonShowedState = ButtonsState.GONE;
+
+    private RectF buttonInstance = null;
+
+    private RecyclerView.ViewHolder currentItemViewHolder = null;
+
+    private SwipeControllerActions buttonsActions = null;
+
+    private static final float buttonWidth = 300;
+
+    public SwipeController(SwipeControllerActions buttonsActions) {
         this.buttonsActions = buttonsActions;
-        this.resources = resources;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class SwipeController extends Callback {
     @Override
     public int convertToAbsoluteDirection(int flags, int layoutDirection) {
         if (swipeBack) {
-            swipeBack = buttonShowed != SwipeCarButtons.NONE;
+            swipeBack = buttonShowedState != ButtonsState.GONE;
             return 0;
         }
         return super.convertToAbsoluteDirection(flags, layoutDirection);
@@ -61,9 +62,9 @@ public class SwipeController extends Callback {
     @Override
     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         if (actionState == ACTION_STATE_SWIPE) {
-            if (buttonShowed != SwipeCarButtons.NONE) {
-                if (buttonShowed == SwipeCarButtons.DELETE) dX = Math.max(dX, buttonWidth);
-                if (buttonShowed == SwipeCarButtons.EDIT) dX = Math.min(dX, -buttonWidth);
+            if (buttonShowedState != ButtonsState.GONE) {
+                if (buttonShowedState == ButtonsState.LEFT_VISIBLE) dX = Math.max(dX, buttonWidth);
+                if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) dX = Math.min(dX, -buttonWidth);
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             }
             else {
@@ -71,7 +72,7 @@ public class SwipeController extends Callback {
             }
         }
 
-        if (buttonShowed == SwipeCarButtons.NONE) {
+        if (buttonShowedState == ButtonsState.GONE) {
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         }
         currentItemViewHolder = viewHolder;
@@ -83,10 +84,10 @@ public class SwipeController extends Callback {
             public boolean onTouch(View v, MotionEvent event) {
                 swipeBack = event.getAction() == MotionEvent.ACTION_CANCEL || event.getAction() == MotionEvent.ACTION_UP;
                 if (swipeBack) {
-                    if (dX < -buttonWidth) buttonShowed = SwipeCarButtons.EDIT;
-                    else if (dX > buttonWidth) buttonShowed  = SwipeCarButtons.DELETE;
+                    if (dX < -buttonWidth) buttonShowedState = ButtonsState.RIGHT_VISIBLE;
+                    else if (dX > buttonWidth) buttonShowedState  = ButtonsState.LEFT_VISIBLE;
 
-                    if (buttonShowed != SwipeCarButtons.NONE) {
+                    if (buttonShowedState != ButtonsState.GONE) {
                         setTouchDownListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
                         setItemsClickable(recyclerView, false);
                     }
@@ -124,14 +125,14 @@ public class SwipeController extends Callback {
                     swipeBack = false;
 
                     if (buttonsActions != null && buttonInstance != null && buttonInstance.contains(event.getX(), event.getY())) {
-                        if (buttonShowed == SwipeCarButtons.DELETE) {
+                        if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
                             buttonsActions.onLeftClicked(viewHolder.getAdapterPosition());
                         }
-                        else if (buttonShowed == SwipeCarButtons.EDIT) {
+                        else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
                             buttonsActions.onRightClicked(viewHolder.getAdapterPosition());
                         }
                     }
-                    buttonShowed = SwipeCarButtons.NONE;
+                    buttonShowedState = ButtonsState.GONE;
                     currentItemViewHolder = null;
                 }
                 return false;
@@ -151,22 +152,22 @@ public class SwipeController extends Callback {
         View itemView = viewHolder.itemView;
         Paint p = new Paint();
 
-        RectF editButton = new RectF(itemView.getLeft(), itemView.getTop(), itemView.getLeft() + buttonWidthWithoutPadding, itemView.getBottom());
-        p.setColor(SwipeCarButtons.EDIT.getColor());
-        c.drawRect(editButton, p);
-        drawText(SwipeCarButtons.EDIT.getText(), c, editButton, p);
+        RectF leftButton = new RectF(itemView.getLeft(), itemView.getTop(), itemView.getLeft() + buttonWidthWithoutPadding, itemView.getBottom());
+        p.setColor(Color.GRAY);
+        c.drawRect(leftButton, p);
+        drawText("EDIT", c, leftButton, p);
 
-        RectF deleteButton = new RectF(itemView.getRight() - buttonWidthWithoutPadding, itemView.getTop(), itemView.getRight(), itemView.getBottom());
-        p.setColor(SwipeCarButtons.DELETE.getColor());
-        c.drawRect(deleteButton, p);
-        drawText(SwipeCarButtons.DELETE.getText(), c, deleteButton, p);
+        RectF rightButton = new RectF(itemView.getRight() - buttonWidthWithoutPadding, itemView.getTop(), itemView.getRight(), itemView.getBottom());
+        p.setColor(Color.RED);
+        c.drawRect(rightButton, p);
+        drawText("DELETE", c, rightButton, p);
 
         buttonInstance = null;
-        if (buttonShowed == SwipeCarButtons.DELETE) {
-            buttonInstance = deleteButton;
+        if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
+            buttonInstance = leftButton;
         }
-        else if (buttonShowed == SwipeCarButtons.EDIT) {
-            buttonInstance = editButton;
+        else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
+            buttonInstance = rightButton;
         }
     }
 
