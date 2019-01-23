@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.View;
 
 import com.example.carsapp.R;
 import com.example.carsapp.adapters.CarDataAdapter;
@@ -37,13 +39,15 @@ public class MainActivity extends AppCompatActivity {
 
         context = this;
 
-//        FloatingActionButton fab = findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                //todo add activity
-//            }
-//        });
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EditCarActivity.class);
+                intent.putExtra("CAR_ID", "-1");
+                startActivity(intent);
+            }
+        });
     }
 
     private void setCarDataAdapter() {

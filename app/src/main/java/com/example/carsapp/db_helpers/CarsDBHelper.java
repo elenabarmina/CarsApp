@@ -19,9 +19,8 @@ public class CarsDBHelper {
         CarModel realmCarModel = realm.where(CarModel.class).equalTo("id", carModelId).findFirst();
 
         Car realmCar = realm.createObject(Car.class, UUID.randomUUID().toString());
-        realmCar.setPrice(Integer.getInteger(price));
-        realmCar.setYear(Integer.getInteger(year));
-
+        realmCar.setPrice(Integer.valueOf(price));
+        realmCar.setYear(Integer.valueOf(price));
         realmCarModel.addCarl(realmCar);
 
         realm.commitTransaction();
